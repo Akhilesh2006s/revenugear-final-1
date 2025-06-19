@@ -14,7 +14,7 @@ interface RotatingModelProps {
 
 function RotatingModel({ scrollY }: RotatingModelProps) {
   const modelRef = useRef<Group>(null)
-  const { scene } = useGLTF("12.glb")
+  const { scene } = useGLTF("10.glb")
 
   useFrame(() => {
     if (modelRef.current) {
@@ -22,22 +22,6 @@ function RotatingModel({ scrollY }: RotatingModelProps) {
       modelRef.current.rotation.x = Math.sin(scrollY * 0.003) * 0.1
     }
   })
-
-  useEffect(() => {
-    scene.traverse((child: any) => {
-      if (child.isMesh && child.material) {
-        if (Array.isArray(child.material)) {
-          child.material.forEach((material: any) => {
-            material.transparent = true
-            material.opacity = 0.25
-          })
-        } else {
-          child.material.transparent = true
-          child.material.opacity = 0.5
-        }
-      }
-    })
-  }, [scene])
 
   return (
     <group ref={modelRef} scale={[1, 1, 1]} position={[0, -1.8, 0]}>
@@ -53,13 +37,19 @@ interface SceneProps {
 function Scene({ scrollY }: SceneProps) {
   return (
     <>
-      <PerspectiveCamera makeDefault position={[0, 0, 6]} />
+      <PerspectiveCamera makeDefault position={[0, -0.3, 6]} />
       <ambientLight intensity={0.8} />
       <directionalLight position={[10, 10, 5]} intensity={1.2} />
       <pointLight position={[-10, -10, -5]} intensity={0.6} />
       <spotLight position={[0, 10, 0]} intensity={0.8} angle={0.3} penumbra={1} />
       <RotatingModel scrollY={scrollY} />
       <Environment preset="city" />
+
+      {/* White transparent overlay */}
+      <mesh position={[0, 0, 4.9]}>
+        <planeGeometry args={[20, 20]} />
+        <meshBasicMaterial color="white" transparent={true} opacity={0.85} />
+      </mesh>
     </>
   )
 }
@@ -446,22 +436,120 @@ export default function Component() {
   const { scrollYProgress } = useScroll()
   const [scrollDirection, setScrollDirection] = useState("up")
   const [lastScrollY, setLastScrollY] = useState(0)
-  const [isMuted, setIsMuted] = useState(true)
-  const [audioAllowed, setAudioAllowed] = useState(false)
 
-  // Initialize audio
-  // const [play, { stop }] = useSound("/1.mp3", {
-  //   loop: true,
-  //   volume: 0.5,
-  //   interrupt: true,
-  // })
+  // Model opacity and scale - instant disappear when reaching "Experience the Difference" section
+  const modelOpacity = useTransform(scrollYProgress, [0.65, 0.66], [1, 0])
+  const modelScale = useTransform(scrollYProgress, [0.65, 0.66], [1, 1])
 
-  // Video ref for hidden video element
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const [audioStarted, setAudioStarted] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
 
-  // Model opacity, scale, and blur based on scroll
-  const modelOpacity = useTransform(scrollYProgress, [0.7, 0.8], [1, 0])
-  const modelScale = useTransform(scrollYProgress, [0.7, 0.8], [1, 0.3])
+  // Audio handling - more aggressive autoplay detection
+  useEffect(() => {
+    let hasTriedAutoplay = false
+
+    const tryPlayAudio = async () => {
+      if (!audioRef.current || audioStarted) return
+
+      try {
+        audioRef.current.volume = 0.5
+        await audioRef.current.play()
+        setAudioStarted(true)
+        console.log("Audio started successfully")
+        return true
+      } catch (error) {
+        console.log("Audio play attempt failed:", error)
+        return false
+      }
+    }
+
+    // Try to play immediately on component mount
+    const attemptAutoplay = async () => {
+      if (hasTriedAutoplay) return
+      hasTriedAutoplay = true
+
+      const success = await tryPlayAudio()
+      if (success) {
+        // Remove all listeners if successful
+        document.removeEventListener("click", handleInteraction)
+        document.removeEventListener("scroll", handleInteraction)
+        document.removeEventListener("touchstart", handleInteraction)
+        document.removeEventListener("keydown", handleInteraction)
+        document.removeEventListener("mousemove", handleInteraction)
+        window.removeEventListener("focus", handleInteraction)
+      }
+    }
+
+    const handleInteraction = async () => {
+      const success = await tryPlayAudio()
+      if (success) {
+        // Remove all listeners after successful start
+        document.removeEventListener("click", handleInteraction)
+        document.removeEventListener("scroll", handleInteraction)
+        document.removeEventListener("touchstart", handleInteraction)
+        document.removeEventListener("keydown", handleInteraction)
+        document.removeEventListener("mousemove", handleInteraction)
+        window.removeEventListener("focus", handleInteraction)
+      }
+    }
+
+    // Try autoplay first
+    attemptAutoplay()
+
+    // Add multiple event listeners for user interaction
+    document.addEventListener("click", handleInteraction, { passive: true })
+    document.addEventListener("scroll", handleInteraction, { passive: true })
+    document.addEventListener("touchstart", handleInteraction, { passive: true })
+    document.addEventListener("keydown", handleInteraction, { passive: true })
+    document.addEventListener("mousemove", handleInteraction, { passive: true })
+    window.addEventListener("focus", handleInteraction, { passive: true })
+
+    return () => {
+      document.removeEventListener("click", handleInteraction)
+      document.removeEventListener("scroll", handleInteraction)
+      document.removeEventListener("touchstart", handleInteraction)
+      document.removeEventListener("keydown", handleInteraction)
+      document.removeEventListener("mousemove", handleInteraction)
+      window.removeEventListener("focus", handleInteraction)
+    }
+  }, [audioStarted])
+
+  // Additional audio setup and retry mechanism
+  useEffect(() => {
+    if (!audioRef.current) return
+
+    const audio = audioRef.current
+
+    // Set up audio properties
+    audio.preload = "auto"
+    audio.volume = 0.5
+
+    // Try to load the audio
+    const handleCanPlay = () => {
+      console.log("Audio can play")
+    }
+
+    const handleLoadedData = () => {
+      console.log("Audio loaded")
+    }
+
+    const handleError = (e: Event) => {
+      console.log("Audio error:", e)
+    }
+
+    audio.addEventListener("canplay", handleCanPlay)
+    audio.addEventListener("loadeddata", handleLoadedData)
+    audio.addEventListener("error", handleError)
+
+    // Force load
+    audio.load()
+
+    return () => {
+      audio.removeEventListener("canplay", handleCanPlay)
+      audio.removeEventListener("loadeddata", handleLoadedData)
+      audio.removeEventListener("error", handleError)
+    }
+  }, [])
 
   useEffect(() => {
     const handleScroll = () => {
@@ -481,108 +569,19 @@ export default function Component() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [lastScrollY])
 
-  // Handle audio permission and autoplay
-  useEffect(() => {
-    // Try to play audio when user interacts with the page
-    const handleUserInteraction = () => {
-      if (!audioAllowed) {
-        setAudioAllowed(true)
-        if (videoRef.current) {
-          videoRef.current.play()
-        }
-        document.removeEventListener("click", handleUserInteraction)
-        document.removeEventListener("scroll", handleUserInteraction)
-      }
-    }
-
-    document.addEventListener("click", handleUserInteraction)
-    document.addEventListener("scroll", handleUserInteraction)
-
-    return () => {
-      document.removeEventListener("click", handleUserInteraction)
-      document.removeEventListener("scroll", handleUserInteraction)
-    }
-  }, [audioAllowed])
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted)
-    if (videoRef.current) {
-      if (isMuted) {
-        videoRef.current.play()
-        videoRef.current.muted = false
-      } else {
-        videoRef.current.pause()
-        videoRef.current.muted = true
-      }
-    }
-  }
-
   return (
     <div className="relative min-h-screen bg-[#E6F6F7]">
-      {/* Hidden Video for Audio */}
-      <video
-        ref={videoRef}
-        loop
-        muted={isMuted}
-        playsInline
-        preload="auto"
-        style={{ display: "none" }}
-        onLoadedData={() => {
-          if (videoRef.current) {
-            videoRef.current.volume = 0.5
-          }
-        }}
-      >
-        <source src="/4.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      {/* Audio Control Button */}
-      <motion.button
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full bg-[#006C67] text-white flex items-center justify-center shadow-lg"
-        onClick={toggleMute}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-      >
-        {isMuted ? (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <line x1="23" y1="9" x2="17" y2="15"></line>
-            <line x1="17" y1="9" x2="23" y2="15"></line>
-          </svg>
-        ) : (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-          </svg>
-        )}
-      </motion.button>
+      {/* Audio Element - plays once until it ends */}
+      <audio ref={audioRef} preload="auto" style={{ display: "none" }}>
+        <source src="/1000.mp4" type="audio/mp4" />
+        <source src="/1000.mp3" type="audio/mpeg" />
+        <source src="/audio.mp3" type="audio/mpeg" />
+        Your browser does not support the audio element.
+      </audio>
 
       {/* Navigation Header */}
       <motion.nav
-        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-6 md:p-8 bg-white/20 backdrop-blur-md border-b border-white/30"
+        className="fixed top-0 left-0 right-0 z-50 flex justify-between items-center p-2 md:p-3 bg-white/10 backdrop-blur-xl border-b border-white/20 shadow-lg"
         initial={{ opacity: 0, y: -50 }}
         animate={{
           opacity: 1,
@@ -596,34 +595,64 @@ export default function Component() {
       >
         <motion.div
           className="flex items-center space-x-3"
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 300 }}
         >
           <motion.div
-            className="w-10 h-10 bg-[#006C67] rounded-lg flex items-center justify-center"
-            whileHover={{ rotate: 360 }}
+            className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 shadow-lg"
+            whileHover={{
+              rotate: 360,
+              scale: 1.1,
+              boxShadow: "0 10px 30px rgba(0, 108, 103, 0.2)",
+            }}
             transition={{ duration: 0.6 }}
           >
-            <span className="text-white font-bold text-lg">RG</span>
+            <img src="/logo1.png" alt="Revenue Gear Logo" className="w-8 h-8 md:w-10 md:h-10 object-contain" />
           </motion.div>
-          <StaggeredFlyText
-            text="Revenue Gear"
-            className="text-[#006C67] font-semibold text-xl tracking-wide font-['Poppins',sans-serif]"
-            delay={0.8}
-            flyDirection="down"
-          />
+
+         
         </motion.div>
 
-        <motion.a
-          href="https://example.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-[#006C67] text-white px-6 py-3 rounded-full hover:bg-[#006F74] transition-all duration-300 font-medium tracking-wide font-['Poppins',sans-serif] shadow-lg inline-block"
-          whileHover={{ scale: 1.05, boxShadow: "0 10px 30px rgba(0, 108, 103, 0.3)" }}
-          whileTap={{ scale: 0.95 }}
+        <motion.div
+          className="flex items-center space-x-4"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.4 }}
         >
-          Contact Us
-        </motion.a>
+          <motion.a
+            href="https://revlabs.tech/#contact"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-gradient-to-r from-[#006C67] to-[#006F74] text-white px-4 py-2 md:px-6 md:py-3 rounded-full hover:from-[#006F74] hover:to-[#005A5F] transition-all duration-300 font-semibold tracking-wide font-['Poppins',sans-serif] shadow-xl text-xs md:text-sm relative overflow-hidden group"
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 15px 35px rgba(0, 108, 103, 0.4)",
+            }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <span className="relative z-10 flex items-center space-x-2">
+              <span>Contact Us</span>
+              <motion.svg
+                className="w-3 h-3 md:w-4 md:h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                whileHover={{ x: 3 }}
+                transition={{ duration: 0.2 }}
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </motion.svg>
+            </span>
+
+            {/* Animated background effect */}
+            <motion.div
+              className="absolute inset-0 bg-white/20 rounded-full"
+              initial={{ scale: 0, opacity: 0 }}
+              whileHover={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            />
+          </motion.a>
+        </motion.div>
       </motion.nav>
 
       {/* 3D Model Section */}
@@ -642,15 +671,15 @@ export default function Component() {
       {/* Scrollable Content */}
       <div className="relative z-10">
         {/* Welcome Section */}
-        <div className="h-screen flex flex-col items-center justify-start pt-32 px-8">
-          <div className="text-center mb-12">
+        <div className="h-screen flex flex-col items-center justify-start pt-20 px-8">
+          <div className="text-center mb-8">
             <div className="mb-8 overflow-hidden">
               <StaggeredFlyText
-                text="WELCOME"
-                className="text-6xl md:text-8xl font-light text-[#006C67] tracking-wider leading-tight
-                           hover:text-[#006F74] transition-all duration-700 ease-out cursor-default
-                           hover:tracking-widest transform hover:scale-105
-                           font-['Poppins',sans-serif] antialiased"
+                text="WELCOME TO"
+                 className="text-5xl md:text-7xl font-semibold text-[#006C67] tracking-wider leading-tight
+                   hover:text-[#006F74] transition-all duration-700 ease-out cursor-default
+                   hover:tracking-widest transform hover:scale-105
+                   font-['Playfair_Display',serif] antialiased"
                 flyDirection="left"
                 flyDistance={100}
               />
@@ -659,9 +688,9 @@ export default function Component() {
               <StaggeredFlyText
                 text="REVENUE GEAR"
                 className="text-5xl md:text-7xl font-semibold text-[#006C67] tracking-wider leading-tight
-                           hover:text-[#006F74] transition-all duration-700 ease-out cursor-default
-                           hover:tracking-widest transform hover:scale-105
-                           font-['Poppins',sans-serif] antialiased"
+                   hover:text-[#006F74] transition-all duration-700 ease-out cursor-default
+                   hover:tracking-widest transform hover:scale-105
+                   font-['Playfair_Display',serif] antialiased"
                 delay={0.5}
                 flyDirection="right"
                 flyDistance={100}
