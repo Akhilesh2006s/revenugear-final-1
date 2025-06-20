@@ -4,34 +4,64 @@ import { useState, useRef, useEffect } from "react"
 import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
+import { Dialog, DialogContent } from "@/components/ui/dialog"
 
-export default function Component() {
+export default function ComicBookReader() {
   const [isOpen, setIsOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(0)
   const [isFlipping, setIsFlipping] = useState(false)
+  const [isOpening, setIsOpening] = useState(false)
   const [flipDirection, setFlipDirection] = useState<"next" | "prev">("next")
   const scrollTimeoutRef = useRef<NodeJS.Timeout>()
   const lastScrollTime = useRef(0)
   const audioRef = useRef<HTMLAudioElement>(null)
   const [isHovered, setIsHovered] = useState(false)
+  const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null)
 
   const pages = [
-    { title: "Page 1", image: "300.png" },
-    { title: "Page 2", image: "301.png" },
-    { title: "Page 3", image: "306.png" },
-    { title: "Page 4", image: "200.png" },
-    
+    {
+      title: "Page 1",
+      leftPage: {
+        background: "COVER2.png",
+        photos: ["1.png", "2.png"],
+      },
+      rightPage: {
+        background: "COVER2.png",
+        photos: ["3.png", "4.png"],
+      },
+    },
+    {
+      title: "Page 2",
+      leftPage: {
+        background: "COVER2.png",
+        photos: ["5.png", "6.png"],
+      },
+      rightPage: {
+        background: "COVER2.png",
+        photos: ["7.png", "8.png"],
+      },
+    },
+    {
+      title: "Page 3",
+      leftPage: {
+        background: "COVER2.png",
+        photos: ["9.png", "10.png"],
+      },
+      rightPage: {
+        background: "COVER2.png",
+        photos: ["12.png", "13.png"],
+      },
+    },
   ]
 
   const handleScroll = (e: WheelEvent) => {
     e.preventDefault()
 
     const now = Date.now()
-    if (now - lastScrollTime.current < 500 || isFlipping) return
+    if (now - lastScrollTime.current < 500 || isFlipping || isOpening) return
     lastScrollTime.current = now
 
     if (e.deltaY > 0) {
-      // Scroll down - next page
       if (currentPage < pages.length - 1) {
         setFlipDirection("next")
         setIsFlipping(true)
@@ -40,7 +70,6 @@ export default function Component() {
           setTimeout(() => setIsFlipping(false), 300)
         }, 300)
       } else {
-        // End of book - close and return to cover
         setIsFlipping(true)
         setTimeout(() => {
           setIsOpen(false)
@@ -49,7 +78,6 @@ export default function Component() {
         }, 500)
       }
     } else {
-      // Scroll up - previous page
       if (currentPage > 0) {
         setFlipDirection("prev")
         setIsFlipping(true)
@@ -69,145 +97,221 @@ export default function Component() {
         return () => bookElement.removeEventListener("wheel", handleScroll)
       }
     }
-  }, [isOpen, currentPage, isFlipping])
+  }, [isOpen, currentPage, isFlipping, isOpening])
 
   const openBook = () => {
-    // Play sound effect
     if (audioRef.current) {
       audioRef.current.currentTime = 0
       audioRef.current.play().catch(console.error)
     }
+
+    setIsOpening(true)
     setIsOpen(true)
     setCurrentPage(0)
+
+    setTimeout(() => {
+      setIsOpening(false)
+    }, 1000)
   }
 
   const closeBook = () => {
     setIsOpen(false)
     setCurrentPage(0)
+    setIsOpening(false)
+  }
+
+  const handlePhotoClick = (photoUrl: string) => {
+    setEnlargedPhoto(photoUrl)
+  }
+
+  const renderPage = (pageData: any, isLeft: boolean) => {
+    if (!pageData) return null
+
+    return (
+      <div className="w-full h-full relative overflow-hidden">
+        <div
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${pageData.background})`,
+          }}
+        />
+        <div className="absolute inset-0 bg-orange-50/10" />
+
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 p-4 sm:gap-6 sm:p-8">
+          {pageData.photos.map((photo: string, index: number) => (
+            <div
+              key={index}
+              className="relative rounded-xl overflow-hidden shadow-xl cursor-pointer transition-all duration-500 hover:scale-125 hover:shadow-2xl hover:z-20 border-4 border-white/90 animate-fade-in-up group"
+              style={{ 
+                animationDelay: `${index * 0.2}s`,
+                maxWidth: "90%",
+                maxHeight: "40%",
+                minHeight: "150px",
+                transform: `rotate(${index % 2 === 0 ? 3 : -3}deg)`
+              }}
+              onClick={() => handlePhotoClick(photo)}
+            >
+              <img
+                src={photo || "/placeholder.png"}
+                alt="Comic Photo"
+                className="w-full h-full object-contain transition-all duration-300 group-hover:brightness-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute bottom-0 left-0 right-0 p-2 text-center text-white text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+                Click to enlarge
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-[#006C67] via-[#006F74] to-[#006C67] p-4">
+    <div className="flex flex-col items-center justify-start min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-yellow-100 p-4 sm:p-8 md:p-20 pt-16 sm:pt-24 md:pt-32">
+      {/* Enlarged Photo Modal */}
+      <Dialog open={!!enlargedPhoto} onOpenChange={(open) => !open && setEnlargedPhoto(null)}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0 bg-transparent border-none overflow-hidden">
+          {enlargedPhoto && (
+            <div className="relative w-full h-full flex items-center justify-center p-2">
+              <img
+                src={enlargedPhoto}
+                alt="Enlarged Comic Photo"
+                className="max-w-[calc(100vw-2rem)] max-h-[calc(100vh-2rem)] object-contain rounded-lg shadow-2xl"
+              />
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setEnlargedPhoto(null)}
+                className="absolute top-2 right-2 w-8 h-8 rounded-full bg-orange-500/90 text-white shadow-lg z-30 hover:scale-110 hover:bg-orange-600 transition-all duration-200"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Animated Heading */}
       <div className="mb-8 text-center">
-        <h1 className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent animate-pulse-glow font-serif tracking-wider drop-shadow-2xl">
+        <h1
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold bg-clip-text text-transparent animate-pulse-glow font-serif tracking-wider drop-shadow-2xl"
+          style={{
+            backgroundImage: `linear-gradient(to right, #FF8C00, #FF6B35, #FF8C00)`,
+          }}
+        >
           THE COMIC STORY
         </h1>
         <div className="mt-4 flex justify-center space-x-2">
-          <div className="w-3 h-3 bg-white rounded-full animate-bounce"></div>
-          <div className="w-3 h-3 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+          <div className="w-3 h-3 rounded-full animate-bounce" style={{ backgroundColor: "#FF8C00" }}></div>
+          <div className="w-3 h-3 bg-orange-300 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+          <div
+            className="w-3 h-3 rounded-full animate-bounce"
+            style={{ backgroundColor: "#FF8C00", animationDelay: "0.2s" }}
+          ></div>
         </div>
       </div>
 
       <div className="relative">
         {!isOpen ? (
-          // Closed Book with Photo Cover - Tilted to the left
+          // Closed Book with Photo Cover
           <div
-            className="cursor-pointer transform perspective-1000 transition-all duration-500 hover:scale-105"
+            className="cursor-pointer transform perspective-1000 transition-all duration-500"
             onClick={openBook}
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             style={{
-              transform: isHovered ? "rotateZ(-25deg) rotateY(10deg) scale(1.05)" : "rotateZ(-15deg)",
+              transform: isHovered ? "rotateZ(-15deg) rotateY(10deg) scale(1.05)" : "rotateZ(0deg) scale(1)",
               transformStyle: "preserve-3d",
               perspective: "1000px",
             }}
           >
-            <Card className="w-80 h-96 shadow-2xl relative overflow-hidden border-4 border-amber-700 bg-black">
+            <Card className="w-full sm:w-[400px] md:w-[500px] h-[500px] sm:h-[550px] md:h-[600px] shadow-2xl relative overflow-hidden border-4 border-orange-400 bg-white">
               <div className="absolute inset-0">
-                <img src="COVER.jpg" alt="Photo Book Cover" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30"></div>
+                <img
+                  src="COVER.jpg"
+                  alt="Comic Book Cover"
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-orange-900/70 via-transparent to-yellow-900/30"></div>
               </div>
               <div className="absolute inset-0 p-8 flex flex-col justify-end items-center text-white">
-                <div className="text-amber-300 text-sm bg-black/50 px-4 py-1 rounded-full backdrop-blur-sm">
+                <div className="text-yellow-200 text-xs sm:text-sm bg-gray-800/70 px-4 py-1 rounded-full backdrop-blur-sm border border-orange-300/30">
                   Click to explore • Scroll to turn pages
                 </div>
               </div>
-              <div className="absolute right-0 top-0 w-3 h-full bg-gradient-to-l from-amber-900 to-amber-700 shadow-inner"></div>
-              <div className="absolute right-3 top-0 w-1 h-full bg-amber-600"></div>
+              <div className="absolute right-0 top-0 w-3 h-full bg-gradient-to-l from-orange-600 to-orange-400 shadow-inner"></div>
+              <div className="absolute right-3 top-0 w-1 h-full bg-orange-500"></div>
             </Card>
           </div>
         ) : (
           // Open Book with Page Turning Animation
           <div id="book-container" className="relative cursor-grab active:cursor-grabbing">
-            <Card className="w-[900px] h-[600px] bg-white shadow-2xl relative overflow-hidden">
+            <Card
+              className={`w-full sm:w-[800px] md:w-[900px] h-[500px] sm:h-[550px] md:h-[600px] bg-white shadow-2xl relative overflow-hidden border border-orange-200 transition-all duration-1000 ${isOpening ? "animate-book-open" : ""}`}
+            >
               {/* Book Binding */}
-              <div className="absolute left-1/2 top-0 w-2 h-full bg-amber-800 transform -translate-x-1/2 z-20 shadow-lg"></div>
+              <div className="absolute left-1/2 top-0 w-2 h-full bg-orange-600 transform -translate-x-1/2 z-20 shadow-lg"></div>
+
+              {/* Opening Animation Cover */}
+              {isOpening && (
+                <div className="absolute inset-0 z-30">
+                  <div className="absolute left-0 top-0 w-1/2 h-full bg-white origin-right animate-page-turn-left shadow-2xl">
+                    <div className="w-full h-full bg-gradient-to-r from-orange-100 to-orange-50 flex items-center justify-center">
+                      <div className="text-gray-600 text-lg font-serif">Opening...</div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Current Page Spread */}
               <div className="absolute inset-0 flex">
                 {/* Left Page */}
-                <div className="w-1/2 h-full flex items-center justify-center border-r border-amber-200 relative overflow-hidden">
-                  {currentPage > 0 && (
-                    <>
-                      <div
-                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                        style={{
-                          backgroundImage: `url(${pages[currentPage - 1]?.image || "/placeholder.svg"})`,
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/10" />
-                    </>
-                  )}
+                <div className="w-1/2 h-full border-r border-orange-200 relative overflow-hidden">
+                  {renderPage(pages[currentPage]?.leftPage, true)}
                 </div>
 
                 {/* Right Page */}
-                <div className="w-1/2 h-full flex items-center justify-center relative overflow-hidden">
-                  {currentPage < pages.length && (
-                    <>
-                      <div
-                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                        style={{
-                          backgroundImage: `url(${pages[currentPage]?.image || "/placeholder.svg"})`,
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/10" />
-                    </>
-                  )}
+                <div className="w-1/2 h-full relative overflow-hidden">
+                  {renderPage(pages[currentPage]?.rightPage, false)}
                 </div>
               </div>
 
               {/* Page Turning Animation Overlay */}
-              {isFlipping && (
+              {isFlipping && !isOpening && (
                 <div className="absolute inset-0 z-10 pointer-events-none">
                   {flipDirection === "next" ? (
                     <div className="absolute right-0 top-0 w-1/2 h-full origin-left animate-flip-next shadow-2xl relative overflow-hidden">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center bg-no-repeat transform scale-x-[-1]"
-                        style={{
-                          backgroundImage: `url(${pages[currentPage]?.image || "/placeholder.svg"})`,
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/10" />
+                      <div className="transform scale-x-[-1] w-full h-full">
+                        {currentPage < pages.length && renderPage(pages[currentPage]?.rightPage, false)}
+                      </div>
                     </div>
                   ) : (
                     <div className="absolute left-0 top-0 w-1/2 h-full origin-right animate-flip-prev shadow-2xl relative overflow-hidden">
-                      <div
-                        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                        style={{
-                          backgroundImage: `url(${pages[currentPage - 1]?.image || "/placeholder.svg"})`,
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-black/10" />
+                      {renderPage(pages[currentPage]?.leftPage, true)}
                     </div>
                   )}
                 </div>
               )}
 
               {/* Progress Indicator */}
-              <div className="absolute bottom-0 left-0 w-full h-1 bg-gray-200 z-30">
+              <div className="absolute bottom-0 left-0 w-full h-1 bg-orange-100 z-30">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-300"
-                  style={{ width: `${((currentPage + 1) / pages.length) * 100}%` }}
+                  className="h-full transition-all duration-300"
+                  style={{
+                    width: `${((currentPage + 1) / pages.length) * 100}%`,
+                    backgroundColor: "#FF8C00",
+                  }}
                 ></div>
               </div>
             </Card>
 
             {/* Instructions */}
             <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 text-center">
-              <p className="text-white/70 text-sm">Scroll down for next page • Scroll up for previous page</p>
-              <p className="text-white/50 text-xs mt-1">
+              <p className="text-gray-700 text-xs sm:text-sm font-medium">
+                Scroll down for next page • Scroll up for previous page • Hover over photos for effects
+              </p>
+              <p className="text-gray-600 text-xs mt-1">
                 Page {currentPage + 1} of {pages.length}
               </p>
             </div>
@@ -217,9 +321,10 @@ export default function Component() {
               variant="ghost"
               size="icon"
               onClick={closeBook}
-              className="absolute -top-12 -right-12 w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 text-white shadow-lg z-30"
+              className="absolute -top-10 sm:-top-12 -right-10 sm:-right-12 w-8 h-8 sm:w-10 sm:h-10 rounded-full text-white shadow-lg z-30 hover:scale-110 transition-all duration-200"
+              style={{ backgroundColor: "#FF8C00" }}
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4 sm:w-5 sm:h-5" />
             </Button>
           </div>
         )}
@@ -261,24 +366,46 @@ export default function Component() {
             opacity: 0;
           }
         }
-        
-        @keyframes pulse-glow {
-          0%, 100% {
-            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5), 0 0 40px rgba(255, 255, 255, 0.3), 0 0 60px rgba(255, 255, 255, 0.1);
+
+        @keyframes page-turn-left {
+          0% {
+            transform: rotateY(0deg);
+            opacity: 1;
           }
-          50% {
-            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 60px rgba(255, 255, 255, 0.5), 0 0 90px rgba(255, 255, 255, 0.3);
+          100% {
+            transform: rotateY(-180deg);
+            opacity: 0;
           }
         }
-        
-        @keyframes fade-in {
+
+        @keyframes book-open {
+          0% {
+            transform: scale(0.8) rotateX(10deg);
+            opacity: 0.8;
+          }
+          100% {
+            transform: scale(1) rotateX(0deg);
+            opacity: 1;
+          }
+        }
+
+        @keyframes fade-in-up {
           0% {
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(30px) scale(0.9);
           }
           100% {
             opacity: 1;
-            transform: translateY(0);
+            transform: translateY(0) scale(1);
+          }
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% {
+            text-shadow: 0 0 20px rgba(255, 140, 0, 0.5), 0 0 40px rgba(255, 140, 0, 0.3), 0 0 60px rgba(255, 140, 0, 0.1);
+          }
+          50% {
+            text-shadow: 0 0 30px rgba(255, 140, 0, 0.8), 0 0 60px rgba(255, 140, 0, 0.5), 0 0 90px rgba(255, 140, 0, 0.3);
           }
         }
         
@@ -289,13 +416,22 @@ export default function Component() {
         .animate-flip-prev {
           animation: flip-prev 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
+
+        .animate-page-turn-left {
+          animation: page-turn-left 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .animate-book-open {
+          animation: book-open 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          opacity: 0;
+        }
         
         .animate-pulse-glow {
           animation: pulse-glow 3s ease-in-out infinite;
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 1s ease-out 0.5s both;
         }
         
         #book-container {

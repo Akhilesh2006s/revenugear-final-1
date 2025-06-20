@@ -2,48 +2,72 @@
 
 import { useState } from "react"
 import { GlareCard } from "@/components/ui/glare-card"
-import { Globe, AlertTriangle, FileCheck, Phone, Heart, BarChart3 } from "lucide-react"
+import {
+  Globe,
+  AlertTriangle,
+  FileCheck,
+  Phone,
+  Heart,
+  BarChart3,
+  Wrench,
+  GaugeCircle,
+  SearchCheck,
+  Languages,
+  Briefcase,
+} from "lucide-react"
 
 export default function StackedGlareCards() {
   const [activeTab, setActiveTab] = useState(0)
 
   const features = [
     {
-      title: "Global Language Intelligence",
-      shortTitle: "Global Language Intelligence",
-      description: "AI-powered multilingual understanding with 95%+ accuracy across international and Indian languages",
+      title: "Understands Indian & International Languages",
+      shortTitle: "Languages",
+      description:
+        "From Hindi, Tamil, and Marathi to English and beyond—RevenueGear analyzes voice data across languages to uncover insights, no matter how your customers speak.",
       icon: Globe,
     },
     {
-      title: "Revenue Leak Detection",
-      shortTitle: "Revenue Leak Detection",
-      description: "Advanced analytics to identify churn risks, billing issues, service gaps, and missed opportunities",
+      title: "Automatic Revenue Leak Classification",
+      shortTitle: "Revenue Leak",
+      description:
+        "AI auto-tags every call with churn risk, service issues, overcharging, delay, or escalation—no manual effort needed.",
       icon: AlertTriangle,
     },
     {
-      title: "Smart Complaint Categorization",
-      shortTitle: "Smart Complaint Categorization",
-      description: "Intelligent auto-tagging system that organizes feedback into actionable business insights",
-      icon: FileCheck,
-    },
-    {
-      title: "Complete Call Analytics",
-      shortTitle: "Complete Call Analytics",
+      title: "Sales Intelligence",
+      shortTitle: "Sales",
       description:
-        "Comprehensive analysis of every customer interaction including service follow-ups and maintenance alerts",
-      icon: Phone,
+        "Understand customer budget, urgency to buy, test drive feedback, comparisons with competitors, and missed follow-ups—so your team can close faster.",
+      icon: Briefcase,
     },
     {
-      title: "Customer Happiness Index",
-      shortTitle: "Customer Happiness Index",
-      description: "Real-time emotion detection through voice patterns and conversation analysis",
-      icon: Heart,
+      title: "100% Visibility & Analysis on All Recorded Calls",
+      shortTitle: "Call Analysis",
+      description:
+        "Every single call is analyzed—outbound, inbound, Maintenance Reminders, PSFU—nothing is missed.",
+      icon: SearchCheck,
     },
     {
-      title: "Voice Insights Dashboard",
-      shortTitle: "Voice Insights Dashboard",
-      description: "Centralized command center for tracking sentiment trends, team performance, and business impact",
+      title: "Customer Sentiment Score in Each Call",
+      shortTitle: "Sentiment Score",
+      description:
+        "Automatically detect tone and emotion to score every customer call—happy, neutral, or frustrated—at a glance.",
+      icon: GaugeCircle,
+    },
+    {
+      title: "Voice of Customer Dashboard",
+      shortTitle: "Customer Dashboard",
+      description:
+        "Track positive and negative feedback, top complaint categories, sentiment trends, and team performance—all in one powerful view.",
       icon: BarChart3,
+    },
+    {
+      title: "Service Insights",
+      shortTitle: "Service",
+      description:
+        "Identify at-risk customers, repeat complaints, poor service quality, and unresolved issues. Get a daily hotlist to prevent churn and improve NPS.",
+      icon: Wrench,
     },
   ]
 
@@ -57,9 +81,12 @@ export default function StackedGlareCards() {
             onClick={() => setActiveTab(index)}
             className={`px-6 py-3 rounded-full text-sm font-medium transition-all duration-300 cursor-pointer hover:scale-105 active:scale-95 ${
               activeTab === index
-                ? "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                : "bg-[#006C67] text-white shadow-lg hover:bg-[#005550]"
+                ? "bg-white/90 text-gray-800 hover:bg-white shadow-lg border border-orange-200"
+                : "text-white shadow-lg hover:shadow-xl border border-orange-300/50"
             }`}
+            style={{
+              backgroundColor: activeTab === index ? undefined : "#FF8C00",
+            }}
           >
             {feature.shortTitle}
           </button>
@@ -96,11 +123,11 @@ export default function StackedGlareCards() {
                 isHorizontal={true}
               >
                 <div className="flex-shrink-0">
-                  <feature.icon className="h-16 w-16 text-white" />
+                  <feature.icon className="h-16 w-16 text-gray-800" />
                 </div>
                 <div className="text-left flex-1">
-                  <h2 className="text-white font-bold text-4xl mb-4">{feature.title}</h2>
-                  <p className="text-white/90 text-xl leading-relaxed">{feature.description}</p>
+                  <h2 className="text-gray-800 font-bold text-4xl mb-4">{feature.title}</h2>
+                  <p className="text-gray-700 text-xl leading-relaxed">{feature.description}</p>
                 </div>
               </GlareCard>
             </div>
@@ -115,8 +142,11 @@ export default function StackedGlareCards() {
             key={index}
             onClick={() => setActiveTab(index)}
             className={`w-3 h-3 rounded-full transition-all duration-300 cursor-pointer hover:scale-110 ${
-              activeTab === index ? "bg-gray-300 hover:bg-gray-400" : "bg-[#006C67] hover:bg-[#005550]"
+              activeTab === index ? "bg-white shadow-lg hover:bg-gray-100 border border-orange-200" : "hover:shadow-md"
             }`}
+            style={{
+              backgroundColor: activeTab === index ? undefined : "#FF8C00",
+            }}
           />
         ))}
       </div>
