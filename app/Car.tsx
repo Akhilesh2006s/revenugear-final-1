@@ -428,20 +428,19 @@ const Features: React.FC = () => {
     {
       icon: CheckCircle,
       title: "21 points checklist",
-      description:
-        "Every call goes through a 21-point checklist covering both service and sales insights. It flags repeat issues, escalations, buyer intent, and competitor mentions. This ensures no revenue risk or sales opportunity is missed.",
+      description: "Every call goes through a 21-point checklist uncovering both service and sales insights.",
     },
     {
       icon: Wrench,
       title: "Service Insights",
       description:
-        "Identify at-risk customers, repeat complaints, poor service quality, and unresolved issues. Get a daily hotlist to prevent churn and improve NPS.",
+        "Identify at-risk customers, repeat complaints, poor service quality, and unresolved issues. Get a daily hotlist to prevent churn and improve NPS score.",
     },
     {
       icon: Briefcase,
       title: "Sales Intelligence",
       description:
-        "Understand customer budget, urgency to buy, test drive feedback, comparisons with competitors, and missed follow-ups—so your team can close faster.",
+        "Understand customer budget, urgency to buy, test drive feedback, comparisons with competitors—So your team is focusing on the right leads.",
     },
     {
       icon: BarChart3,
@@ -452,14 +451,12 @@ const Features: React.FC = () => {
     {
       icon: Frown,
       title: "Customer Sentiment Score in Each Call",
-      description:
-        "Automatically detect tone and emotion to score every customer call—happy, neutral, or frustrated—at a glance.",
+      description: "Automatically detect tone and emotion to score every customer call.",
     },
     {
       icon: AlertTriangle,
       title: "Automatic Revenue Leak Classification",
-      description:
-        "AI auto-tags every call with churn risk, service issues, overcharging, delay, or escalation—no manual effort needed.",
+      description: "AI Agent tags every call where focus is needed— 0% manual effort needed.",
     },
     {
       icon: Search,
@@ -470,7 +467,7 @@ const Features: React.FC = () => {
       icon: Globe,
       title: "Understands Indian & International Languages",
       description:
-        "From Hindi, Tamil, Marathi, Kannada, Telugu to English and beyond—RevenueGear analyzes voice data across languages to uncover insights, no matter how your customers speak.",
+        "English Hindi, Tamil, Marathi, Malayalam, Kannada, Telugu, and beyond—RevenueGear analyzes voice data across languages to uncover insights, no matter how your customers speak.",
     },
   ]
 
@@ -807,27 +804,25 @@ export default function RevenueGearLanding() {
         )}
 
         {/* Contact Us Button on the right */}
-       <motion.a
-  href="https://revlabs.tech/#contact"
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-medium tracking-wide shadow-md text-xs md:text-sm transition-all text-center"
-  style={{
-    background: `linear-gradient(to right, #F9A01B, #F97316)`,
-  }}
-  whileHover={{
-    scale: 1.05,
-    boxShadow: "0 6px 12px rgba(249, 160, 27, 0.4)",
-  }}
-  whileTap={{ scale: 0.95 }}
->
-  <span className="flex flex-col items-center justify-center">
-    <span>Hear Every Customer.</span>
-    <span>Fix What Matters. Now!</span>
-    
-  </span>
-</motion.a>
-
+        <motion.a
+          href="https://revlabs.tech/#contact"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-medium tracking-wide shadow-md text-xs md:text-sm transition-all text-center"
+          style={{
+            background: `linear-gradient(to right, #F9A01B, #F97316)`,
+          }}
+          whileHover={{
+            scale: 1.05,
+            boxShadow: "0 6px 12px rgba(249, 160, 27, 0.4)",
+          }}
+          whileTap={{ scale: 0.95 }}
+        >
+          <span className="flex flex-col items-center justify-center">
+            <span>Hear Every Customer.</span>
+            <span>Fix What Matters. Now!</span>
+          </span>
+        </motion.a>
       </motion.nav>
 
       {/* 3D Model Section */}
@@ -886,8 +881,8 @@ export default function RevenueGearLanding() {
                   — the rest go unheard.
                   <br />
                   <br />
-                  <span className="text-orange-600 font-bold">RevenueGear's</span> AI agent analyzes 100% of your customer calls. Flag customer churn risks, repeat issues,
-                  poor service quality gaps etc. instantly.
+                  <span className="text-orange-600 font-bold">RevenueGear's</span> AI agent analyzes 100% of your
+                  customer calls. Flag customer churn risks, repeat issues, poor service quality gaps etc. instantly.
                   <br />
                   Unlock sales signals like budget, competitor brands analysis, test drive feedback, and buying intent.
                 </motion.p>
@@ -898,8 +893,9 @@ export default function RevenueGearLanding() {
                   transition={{ delay: 0.6 }}
                   className="text-13px text-darkgray-600 leading-relaxed"
                 >
-                  Get a <span className="text-orange-600 font-bold">hotlist</span> of at-risk customers to retain and sales inquiries that could convert — with 360 voice
-                  analytics and agent performance – across Indian and global languages.
+                  Get a <span className="text-orange-600 font-bold">hotlist</span> of at-risk customers to retain and
+                  sales inquiries that could convert — with 360 voice analytics and agent performance – across Indian
+                  and global languages.
                 </motion.p>
 
                 {/* Stats */}
