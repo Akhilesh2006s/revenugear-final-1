@@ -1,198 +1,292 @@
+// components/contact-form.tsx
 "use client"
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { ArrowRight, Phone, Mail, MapPin, Clock } from "lucide-react"
+import { useToast } from "@/hooks/use-toast"
 
+interface FormData {
+  firstName: string
+  lastName: string
+  email: string
+  dealership: string
+  phone: string
+  message: string
+}
 
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Play, ArrowRight, Brain, TrendingUp, Car } from 'lucide-react';
+export default function ContactForm() {
+  const { toast } = useToast()
+  const [formData, setFormData] = useState<FormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    dealership: "",
+    phone: "",
+    message: "",
+  })
 
-const Hero: React.FC = () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+
+    // Basic validation
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.dealership || !formData.phone) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address.",
+        variant: "destructive",
+      })
+      return
+    }
+
+    // Create email content
+    const subject = `Demo Request from ${formData.firstName} ${formData.lastName}`
+    const body = `
+      First Name: ${formData.firstName}
+      Last Name: ${formData.lastName}
+      Email: ${formData.email}
+      Dealership: ${formData.dealership}
+      Phone: ${formData.phone}
+      Message: ${formData.message || "No message provided"}
+      
+      This request was submitted via the RevenueGear contact form.
+    `.replace(/^\s+/gm, '') // Remove leading whitespace
+
+    // Encode for URL
+    const encodedSubject = encodeURIComponent(subject)
+    const encodedBody = encodeURIComponent(body)
+
+    // Open default email client
+    window.location.href = `mailto:anand@revenuegear.tech?subject=${encodedSubject}&body=${encodedBody}`
+
+    // Show success message
+    toast({
+      title: "Email Client Opened",
+      description: "Please review and send the pre-filled email to contact us.",
+    })
+  }
+
   return (
-    <section id="home" className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 overflow-hidden pt-20">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0">
-        {/* Floating Cars Animation */}
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={`car-${i}`}
-            className="absolute opacity-10"
-            style={{
-              left: `${-10 + i * 40}%`,
-              top: `${20 + i * 30}%`,
-            }}
-            animate={{
-              x: [0, window.innerWidth + 100],
-              y: [0, -50, 0, 50, 0],
-            }}
-            transition={{
-              duration: 15 + i * 5,
-              repeat: Infinity,
-              delay: i * 3,
-              ease: "linear",
-            }}
-          >
-            <Car size={40 + i * 10} className="text-amber-500 rotate-90" />
-          </motion.div>
-        ))}
-
-        {/* Floating Dots */}
-        {[...Array(8)].map((_, i) => (
-          <motion.div
-            key={`dot-${i}`}
-            className="absolute w-2 h-2 bg-amber-400 rounded-full opacity-20"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-            }}
-            animate={{
-              scale: [1, 1.5, 1],
-              opacity: [0.2, 0.5, 0.2],
-              y: [0, -20, 0],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
+    <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-amber-900 text-white relative overflow-hidden">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fillRule='evenodd'%3E%3Cg fill='%23fbbf24' fillOpacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          }}
+        ></div>
       </div>
 
       <div className="container mx-auto px-6 lg:px-8 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left Content */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-4xl lg:text-6xl font-bold mb-6">
+            Start Catching Revenue Leaks{" "}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">
+              Before They Cost You
+            </span>
+          </h2>
+          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+            Join leading dealerships already protecting millions in revenue with RevenueGear
+          </p>
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          {/* Left - Contact Form */}
           <motion.div
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-center lg:text-left"
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="bg-white/10 backdrop-blur-lg p-8 rounded-3xl border border-white/20"
           >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="inline-flex items-center gap-2 bg-amber-100 text-amber-800 px-4 py-2 rounded-full text-sm font-medium mb-6"
-            >
-              <Brain size={16} />
-              AI-Powered Voice Intelligence
-            </motion.div>
-
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight"
-            >
-              Your Ears on Every{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">
-                Customer Call
-              </span>
-            </motion.h1>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-              className="text-xl text-gray-600 mb-8 max-w-2xl"
-            >
-              Stop revenue leaks before they happen. RevenueGear listens, understands, and alerts — so your customers never leave silently.
-            </motion.p>
-
-            
-
-            {/* Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.6 }}
-              className="grid grid-cols-3 gap-6 mt-12 pt-8 border-t border-gray-200"
-            >
-              <div className="text-center lg:text-left">
-                <div className="text-2xl font-bold text-gray-900">₹10L+</div>
-                <div className="text-sm text-gray-600">Monthly Savings</div>
+            <h3 className="text-2xl font-bold mb-6">Request a Demo</h3>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-gray-300 mb-2">
+                    First Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    placeholder="Enter your first name"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-gray-300 mb-2">
+                    Last Name *
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    placeholder="Enter your last name"
+                  />
+                </div>
               </div>
-              <div className="text-center lg:text-left">
-                <div className="text-2xl font-bold text-gray-900">45%</div>
-                <div className="text-sm text-gray-600">Less Complaints</div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  placeholder="Enter your email"
+                />
               </div>
-              <div className="text-center lg:text-left">
-                <div className="text-2xl font-bold text-gray-900">30%</div>
-                <div className="text-sm text-gray-600">Better Retention</div>
+              <div>
+                <label htmlFor="dealership" className="block text-sm font-medium text-gray-300 mb-2">
+                  Dealership Name *
+                </label>
+                <input
+                  type="text"
+                  id="dealership"
+                  name="dealership"
+                  value={formData.dealership}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  placeholder="Enter your dealership name"
+                />
               </div>
-            </motion.div>
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  placeholder="Enter your phone number"
+                />
+              </div>
+              <div>
+                <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
+                  Message (Optional)
+                </label>
+                <textarea
+                  id="message"
+                  name="message"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                  placeholder="Tell us about your specific needs..."
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 group"
+              >
+                Open Email Client
+                <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </button>
+            </form>
           </motion.div>
 
-          {/* Right Content - Animated Visualization */}
+          {/* Right - Contact Info */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="relative"
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="space-y-8"
           >
-            <div className="relative bg-white rounded-3xl p-8 shadow-2xl border border-gray-100">
-              <div className="space-y-6">
-                {/* Waveform Animation */}
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full flex items-center justify-center">
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity }}
-                    >
-                      <Brain size={24} className="text-white" />
-                    </motion.div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-gray-900 mb-2">Live Call Analysis</div>
-                    <div className="flex items-center gap-1">
-                      {[...Array(20)].map((_, i) => (
-                        <motion.div
-                          key={i}
-                          className="w-1 bg-gradient-to-t from-amber-500 to-orange-500 rounded-full"
-                          style={{ height: `${Math.random() * 40 + 10}px` }}
-                          animate={{ height: [`${Math.random() * 40 + 10}px`, `${Math.random() * 40 + 10}px`] }}
-                          transition={{ duration: 0.5, repeat: Infinity, delay: i * 0.1 }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
+            <div>
+              <h3 className="text-3xl font-bold mb-6">Get in Touch</h3>
+              <p className="text-gray-300 text-lg mb-8">
+                Ready to transform your customer service and protect your revenue? Our team is here to help you get
+                started.
+              </p>
+            </div>
 
-                {/* Insights */}
-                <div className="space-y-3">
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1 }}
-                    className="flex items-center gap-3 p-3 bg-red-50 border border-red-200 rounded-lg"
-                  >
-                    <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-red-700 font-medium">High churn risk detected</span>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.2 }}
-                    className="flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-lg"
-                  >
-                    <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-amber-700 font-medium">Customer frustration: Medium</span>
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 1.4 }}
-                    className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg"
-                  >
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <span className="text-sm text-green-700 font-medium">Service team alerted</span>
-                  </motion.div>
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
+                  <Phone size={24} className="text-white" />
+                </div>
+                <div>
+                  <div className="font-semibold">Call Us</div>
+                  <div className="text-gray-300">+91 9632213191</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
+                  <Mail size={24} className="text-white" />
+                </div>
+                <div>
+                  <div className="font-semibold">Email Us</div>
+                  <div className="text-gray-300">anand@revenuegear.tech</div>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
+                  <MapPin size={24} className="text-white" />
+                </div>
+                <div>
+                  
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
+                  <Clock size={24} className="text-white" />
+                </div>
+                <div>
+                 
                 </div>
               </div>
             </div>
+
+            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 p-6 rounded-2xl border border-amber-500/30">
+              <h4 className="font-bold text-lg mb-2">Assuring Our Best,Always!</h4>
+              
+            </div>
           </motion.div>
         </div>
+
+        {/* Bottom CTA */}
+     
       </div>
     </section>
-  );
-};
-
-export default Hero;
+  )
+}
