@@ -1,8 +1,8 @@
-// components/contact-form.tsx
 "use client"
+
 import { useState } from "react"
 import { motion } from "framer-motion"
-import { ArrowRight, Phone, Mail, MapPin, Clock } from "lucide-react"
+import { ArrowRight, Phone, Mail } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 
 interface FormData {
@@ -10,6 +10,7 @@ interface FormData {
   lastName: string
   email: string
   dealership: string
+  address: string
   phone: string
   message: string
 }
@@ -21,6 +22,7 @@ export default function ContactForm() {
     lastName: "",
     email: "",
     dealership: "",
+    address: "",
     phone: "",
     message: "",
   })
@@ -36,7 +38,7 @@ export default function ContactForm() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    // Basic validation
+    // Validation
     if (!formData.firstName || !formData.lastName || !formData.email || !formData.dealership || !formData.phone) {
       toast({
         title: "Missing Information",
@@ -46,7 +48,6 @@ export default function ContactForm() {
       return
     }
 
-    // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(formData.email)) {
       toast({
@@ -57,27 +58,24 @@ export default function ContactForm() {
       return
     }
 
-    // Create email content
     const subject = `Demo Request from ${formData.firstName} ${formData.lastName}`
     const body = `
       First Name: ${formData.firstName}
       Last Name: ${formData.lastName}
       Email: ${formData.email}
       Dealership: ${formData.dealership}
+      Address: ${formData.address}
       Phone: ${formData.phone}
       Message: ${formData.message || "No message provided"}
-      
-      This request was submitted via the RevenueGear contact form.
-    `.replace(/^\s+/gm, '') // Remove leading whitespace
 
-    // Encode for URL
+      This request was submitted via the RevenueGear contact form.
+    `.replace(/^\s+/gm, '')
+
     const encodedSubject = encodeURIComponent(subject)
     const encodedBody = encodeURIComponent(body)
 
-    // Open default email client
-    window.location.href = `mailto:anand@revenuegear.tech?subject=${encodedSubject}&body=${encodedBody}`
+    window.location.href = `mailto:anand@clickto.tech?subject=${encodedSubject}&body=${encodedBody}`
 
-    // Show success message
     toast({
       title: "Email Client Opened",
       description: "Please review and send the pre-filled email to contact us.",
@@ -85,8 +83,8 @@ export default function ContactForm() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-amber-900 text-white relative overflow-hidden">
-      {/* Background Pattern */}
+    <section id="brain" className="py-20 bg-gradient-to-br from-gray-900 via-gray-800 to-amber-900 text-white relative overflow-hidden">
+      {/* Background dots */}
       <div className="absolute inset-0 opacity-10">
         <div
           className="absolute inset-0"
@@ -104,7 +102,8 @@ export default function ContactForm() {
           className="text-center mb-16"
         >
           <h2 className="text-4xl lg:text-6xl font-bold mb-6">
-            Start Catching Revenue Leaks{" "}
+            Start Catching Revenue Leak Signals{" "}
+            <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-400">
               Before They Cost You
             </span>
@@ -115,7 +114,7 @@ export default function ContactForm() {
         </motion.div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Left - Contact Form */}
+          {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -136,7 +135,7 @@ export default function ContactForm() {
                     value={formData.firstName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     placeholder="Enter your first name"
                   />
                 </div>
@@ -151,11 +150,12 @@ export default function ContactForm() {
                     value={formData.lastName}
                     onChange={handleInputChange}
                     required
-                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                    className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                     placeholder="Enter your last name"
                   />
                 </div>
               </div>
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
                   Email Address *
@@ -167,10 +167,11 @@ export default function ContactForm() {
                   value={formData.email}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="Enter your email"
                 />
               </div>
+
               <div>
                 <label htmlFor="dealership" className="block text-sm font-medium text-gray-300 mb-2">
                   Dealership Name *
@@ -182,10 +183,27 @@ export default function ContactForm() {
                   value={formData.dealership}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="Enter your dealership name"
                 />
               </div>
+
+              <div>
+                <label htmlFor="address" className="block text-sm font-medium text-gray-300 mb-2">
+                  Dealership Address *
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                  placeholder="Enter your dealership address"
+                />
+              </div>
+
               <div>
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
                   Phone Number *
@@ -197,10 +215,11 @@ export default function ContactForm() {
                   value={formData.phone}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
                   placeholder="Enter your phone number"
                 />
               </div>
+
               <div>
                 <label htmlFor="message" className="block text-sm font-medium text-gray-300 mb-2">
                   Message (Optional)
@@ -211,21 +230,22 @@ export default function ContactForm() {
                   value={formData.message}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"
                   placeholder="Tell us about your specific needs..."
                 />
               </div>
+
               <button
                 type="submit"
                 className="w-full bg-gradient-to-r from-amber-500 to-orange-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2 group"
               >
-                Open Email Client
+                Send Email
                 <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </form>
           </motion.div>
 
-          {/* Right - Contact Info */}
+          {/* Right Column - Contact Info */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -235,8 +255,7 @@ export default function ContactForm() {
             <div>
               <h3 className="text-3xl font-bold mb-6">Get in Touch</h3>
               <p className="text-gray-300 text-lg mb-8">
-                Ready to transform your customer service and protect your revenue? Our team is here to help you get
-                started.
+                Ready to transform your customer service and protect your revenue? Our team is here to help you get started.
               </p>
             </div>
 
@@ -250,42 +269,30 @@ export default function ContactForm() {
                   <div className="text-gray-300">+91 9632213191</div>
                 </div>
               </div>
+
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
                   <Mail size={24} className="text-white" />
                 </div>
                 <div>
                   <div className="font-semibold">Email Us</div>
-                  <div className="text-gray-300">anand@revenuegear.tech</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
-                  <MapPin size={24} className="text-white" />
-                </div>
-                <div>
-                  
-                </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-amber-500 rounded-full flex items-center justify-center">
-                  <Clock size={24} className="text-white" />
-                </div>
-                <div>
-                 
+                  <div className="text-gray-300">anand@clickto.tech</div>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 p-6 rounded-2xl border border-amber-500/30">
-              <h4 className="font-bold text-lg mb-2">Assuring Our Best,Always!</h4>
-              
+            {/* Footer Notes */}
+            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 p-6 rounded-2xl border border-amber-500/30 text-center">
+              <h4 className="font-bold text-lg mb-2">Assuring Our Best, Always!</h4>
+            </div>
+
+            <div className="bg-gradient-to-r from-amber-500/20 to-orange-500/20 p-6 rounded-2xl border border-amber-500/30 text-center">
+              <h4 className="font-bold text-lg mb-2">
+                Made with <span className="text-red-500">❤️</span> at RevLabs
+              </h4>
             </div>
           </motion.div>
         </div>
-
-        {/* Bottom CTA */}
-     
       </div>
     </section>
   )
