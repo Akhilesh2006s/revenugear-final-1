@@ -470,7 +470,7 @@ const Features: React.FC = () => {
       icon: Globe,
       title: "Understands Indian & International Languages",
       description:
-        "English,Hindi, Tamil, Marathi, Malayalam, Kannada, Telugu, RevenueGear analyzes customer voice data across languages and dialects.",
+        "English,Hindi, Tamil, Marathi, Malayalam, Kannada, Telugu and beyond.",
     },
   ]
 
@@ -807,26 +807,25 @@ export default function RevenueGearLanding() {
         )}
 
         {/* Contact Us Button on the right */}
-        <motion.a
-          href="https://revlabs.tech/#contact"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-medium tracking-wide shadow-md text-xs md:text-sm transition-all text-center"
-          style={{
-            background: `linear-gradient(to right, #F9A01B, #F97316)`,
-          }}
-          whileHover={{
-            scale: 1.05,
-            boxShadow: "0 6px 12px rgba(249, 160, 27, 0.4)",
-          }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <span className="flex flex-col items-center justify-center">
-            <span>Hear Every Customer.</span>
-            <span>Fix What Matters. Now!</span>
-          </span>
-        </motion.a>
+     <motion.a
+  href="#brain"
+  className="text-white px-4 py-2 md:px-6 md:py-3 rounded-full font-medium tracking-wide shadow-md text-xs md:text-sm transition-all text-center"
+  style={{
+    background: `linear-gradient(to right, #F9A01B, #F97316)`,
+  }}
+  whileHover={{
+    scale: 1.05,
+    boxShadow: "0 6px 12px rgba(249, 160, 27, 0.4)",
+  }}
+  whileTap={{ scale: 0.95 }}
+>
+  <span className="flex flex-col items-center justify-center">
+    <span>Hear Every Customer.</span>
+    <span>Fix What Matters. Now!</span>
+  </span>
+</motion.a>
       </motion.nav>
+
 
       {/* 3D Model Section */}
       <motion.div
