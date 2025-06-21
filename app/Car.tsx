@@ -394,11 +394,14 @@ const OurContributions: React.FC = () => {
               transition={{ delay: index * 0.1 }}
               className="group bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer text-center"
               whileHover={{
-                boxShadow: "0 10px 30px rgba(249, 160, 27, 0.2)",
+                boxShadow: "0 20px 40px rgba(249, 160, 27, 0.3)",
+                y: -8,
+                scale: 1.05,
+                transition: { duration: 0.3, ease: "easeOut" },
               }}
             >
               <div
-                className={`w-16 h-16 ${contribution.bgColor} rounded-full flex items-center justify-center mx-auto mb-6`}
+                className={`w-16 h-16 ${contribution.bgColor} rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6`}
               >
                 <contribution.icon size={32} className={contribution.color} />
               </div>
@@ -467,7 +470,7 @@ const Features: React.FC = () => {
       icon: Globe,
       title: "Understands Indian & International Languages",
       description:
-        "English Hindi, Tamil, Marathi, Malayalam, Kannada, Telugu, and beyond—RevenueGear analyzes voice data across languages to uncover insights, no matter how your customers speak.",
+        "English,Hindi, Tamil, Marathi, Malayalam, Kannada, Telugu, RevenueGear analyzes customer voice data across languages and dialects.",
     },
   ]
 
@@ -493,20 +496,20 @@ const Features: React.FC = () => {
               transition={{ delay: index * 0.1 }}
               className="group bg-white p-8 rounded-2xl border border-gray-100 hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
               whileHover={{
-                boxShadow: "0 10px 30px rgba(249, 160, 27, 0.2)",
+                boxShadow: "0 20px 40px rgba(249, 160, 27, 0.3)",
+                y: -10,
+                scale: 1.08,
+                transition: { duration: 0.3, ease: "easeOut" },
               }}
             >
-              <div className="flex items-center mb-6">
-                <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mr-4">
-                  <capability.icon size={24} className="text-white" />
-                </div>
-                <h3
-                  className={`text-xl font-bold text-gray-900 group-hover:text-INTER BOLD-700 transition-colors ${poppins.className}`}
-                >
-                  {capability.title}
-                </h3>
+              <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mr-4 transition-all duration-300 group-hover:scale-110 group-hover:rotate-6">
+                <capability.icon size={24} className="text-white" />
               </div>
-
+              <h3
+                className={`text-xl font-bold text-gray-900 group-hover:text-INTER BOLD-700 transition-colors ${poppins.className}`}
+              >
+                {capability.title}
+              </h3>
               <p className={`text-gray-600 leading-relaxed ${poppins.className}`}>{capability.description}</p>
 
               <div className="mt-6 flex items-center text-amber-600 font-INTER BOLD opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -876,13 +879,14 @@ export default function RevenueGearLanding() {
                   transition={{ delay: 0.5 }}
                   className="text-13px text-black-600 leading-relaxed"
                 >
-                  Only <span className="text-orange-600 font-bold">1</span> in{" "}
-                  <span className="text-orange-600 font-bold">75</span> customer calls gets reviewed at a car dealership
+                  Only <span className="text-orange-500 font-bold">1</span> in{" "}
+                  <span className="text-orange-500 font-bold">75</span> customer calls gets reviewed at a car dealership
                   — the rest go unheard.
                   <br />
                   <br />
-                  <span className="text-orange-600 font-bold">RevenueGear's</span> AI agent analyzes 100% of your
-                  customer calls. Flag customer churn risks, repeat issues, poor service quality gaps etc. instantly.
+                  <span className="text-orange-500 font-bold">RevenueGear's</span> AI agent analyzes{" "}
+                  <span className="text-orange-500 font-bold">100%</span> of your customer calls. Flag customer churn
+                  risks, repeat issues, poor service quality gaps etc. instantly.
                   <br />
                   Unlock sales signals like budget, competitor brands analysis, test drive feedback, and buying intent.
                 </motion.p>
@@ -893,7 +897,7 @@ export default function RevenueGearLanding() {
                   transition={{ delay: 0.6 }}
                   className="text-13px text-darkgray-600 leading-relaxed"
                 >
-                  Get a <span className="text-orange-600 font-bold">hotlist</span> of at-risk customers to retain and
+                  Get a <span className="text-orange-500 font-bold">hotlist</span> of at-risk customers to retain and
                   sales inquiries that could convert — with 360 voice analytics and agent performance – across Indian
                   and global languages.
                 </motion.p>
@@ -986,19 +990,17 @@ export default function RevenueGearLanding() {
         </section>
 
         {/* Trusted Brands Section */}
-        <div id="brands" className="relative z-10 py-20">
+        <div id="brands" className="relative z-10 py-2">
           <div className="text-center mb-16">
-            <FlyText delay={0.2} flyDirection="up" flyDistance={80}>
-              <h2 className={`text-4xl lg:text-5xl font-inter bold text-gray-900 mb-8 ${poppins.className}`}>
-                Our{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">
-                  Customers'{" "}
-                </span>
-                <span className={`text-4xl lg:text-5xl font-inter bold text-gray-900 mb-8 ${poppins.className}`}>
-                  Brands
-                </span>
-              </h2>
-            </FlyText>
+            <h2 className={`text-4xl lg:text-5xl font-inter bold text-gray-900 mb-8 ${poppins.className}`}>
+              Our{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-500 to-orange-500">
+                Customers'{" "}
+              </span>
+              <span className={`text-4xl lg:text-5xl font-inter bold text-gray-900 mb-8 ${poppins.className}`}>
+                Brands
+              </span>
+            </h2>
           </div>
 
           {/* Single Line Brand Animation */}
