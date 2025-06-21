@@ -189,18 +189,18 @@ export default function ContactForm() {
               </div>
 
               <div>
-                <label htmlFor="address" className="block text-sm font-medium text-gray-300 mb-2">
-                  Dealership Address *
+                 <label htmlFor="dealership address" className="block text-sm font-medium text-gray-300 mb-2">
+                  HQ Location *
                 </label>
                 <input
                   type="text"
-                  id="address"
-                  name="address"
-                  value={formData.address}
+                  id="dealership"
+                  name="dealership"
+                  value={formData.dealership}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500"
-                  placeholder="Enter your dealership address"
+                  className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent"
+                  placeholder="Enter your Head quarters location"
                 />
               </div>
 
